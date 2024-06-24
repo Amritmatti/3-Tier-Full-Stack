@@ -6,6 +6,12 @@ pipeline {
     }
 
     stages {
+        stage('Clone Code From Repo') {
+            steps {
+                // Get some code from a GitHub repository
+                git branch: 'main', url: 'https://github.com/Amritmatti/Harbor_CICD_Pipeline.git'
+            }
+        }
         stage('Collecting Build User Name') {
             steps {
                 // Collection username of user who has started job
