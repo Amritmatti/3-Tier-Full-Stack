@@ -11,7 +11,7 @@ pipeline {
                 // Get some code from a GitHub repository
                 git branch: 'main', url: 'https://github.com/Amritmatti/Harbor_CICD_Pipeline.git'
             }
-        }
+        }        
         stage('Collecting Build User Name') {
             steps {
                 // Collection username of user who has started job
@@ -22,7 +22,7 @@ pipeline {
                 }
             }
         }
-        stage('Collectin Env\'s') {
+        stage('Collecting Env\'s') {
             steps {
                 // Collecting Git Branch and Merged Branch Name
                 script {
@@ -43,7 +43,7 @@ pipeline {
         }
 
         stage('Notify Start') {
-                // Sending Alert for build start
+            // Sending Alert for build start
             steps {
                 withCredentials([
                     string(credentialsId: 'telegram_token', variable: 'TOKEN'),
@@ -66,35 +66,15 @@ pipeline {
                 // Performing Job Steps and send alert if job failed due to any issue
                 dir('src') {
                     script {
-                        try {
-                            // Your test command here
-                            sh 'test' // Replace with your actual test command
-                            // Simulate a failure for demonstration purposes
-                            // sh 'exit 1' // Uncomment to simulate a failure
-                        } catch (err) {
-                            echo err.getMessage()
-                            withCredentials([
-                                string(credentialsId: 'telegram_token', variable: 'TOKEN'),
-                                string(credentialsId: 'telegram_chat_id', variable: 'CHAT_ID')
-                            ]) {
-                                script {
-                                    sh '''
-                                    CURRENT_DATE=$(date)
-                                    curl -s -X POST https://api.telegram.org/bot${TOKEN}/sendMessage \
-                                        -d "chat_id=${CHAT_ID}" \
-                                        -d text="Application: ${APPLICATION_NAME}\nUser: ${BUILD_USER_ID}\nBuild Url: ${BUILD_URL}\nBuild Number: ${BUILD_NUMBER}\nDeployment Branch: ${SOURCE_BRANCH}\nMerged Branch: ${SOURCE_BRANCH} ← ${MERGED_BRANCH}\nDate/Time: ${CURRENT_DATE}\nStatus: ❌ Failed to build 😱"
-                                    '''
-                                }
-                            }
-                            sh 'exit 1'
-                        }
+                        // Your test command here
+                        sh 'sleep 1m' // Replace with your actual test command
                     }
                 }
             }
         }
 
         stage('Finished msg') {
-                // Sending Alert if Job is
+            // This stage is only for a successful build
             steps {
                 withCredentials([
                     string(credentialsId: 'telegram_token', variable: 'TOKEN'),
@@ -108,6 +88,47 @@ pipeline {
                             -d text="Application: ${APPLICATION_NAME}\nUser: ${BUILD_USER_ID}\nBuild Url: ${BUILD_URL}\nBuild Number: ${BUILD_NUMBER}\nDeployment Branch: ${SOURCE_BRANCH}\nMerged Branch: ${SOURCE_BRANCH} ← ${MERGED_BRANCH}\nDate/Time: ${CURRENT_DATE}\nStatus: ✅ Build successfully 😊"
                         '''
                     }
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            // This block runs if the build is successful
+            echo 'Build succeeded!'
+        }
+
+        failure {
+            // This block runs if the build fails
+            withCredentials([
+                string(credentialsId: 'telegram_token', variable: 'TOKEN'),
+                string(credentialsId: 'telegram_chat_id', variable: 'CHAT_ID')
+            ]) {
+                script {
+                    sh '''
+                    CURRENT_DATE=$(date)
+                    curl -s -X POST https://api.telegram.org/bot${TOKEN}/sendMessage \
+                        -d "chat_id=${CHAT_ID}" \
+                        -d text="Application: ${APPLICATION_NAME}\nUser: ${BUILD_USER_ID}\nBuild Url: ${BUILD_URL}\nBuild Number: ${BUILD_NUMBER}\nDeployment Branch: ${SOURCE_BRANCH}\nMerged Branch: ${SOURCE_BRANCH} ← ${MERGED_BRANCH}\nDate/Time: ${CURRENT_DATE}\nStatus: ❌ Failed to build 😱"
+                    '''
+                }
+            }
+        }
+
+        aborted {
+            // This block runs if the build is aborted
+            withCredentials([
+                string(credentialsId: 'telegram_token', variable: 'TOKEN'),
+                string(credentialsId: 'telegram_chat_id', variable: 'CHAT_ID')
+            ]) {
+                script {
+                    sh '''
+                    CURRENT_DATE=$(date)
+                    curl -s -X POST https://api.telegram.org/bot${TOKEN}/sendMessage \
+                        -d "chat_id=${CHAT_ID}" \
+                        -d text="Application: ${APPLICATION_NAME}\nUser: ${BUILD_USER_ID}\nBuild Url: ${BUILD_URL}\nBuild Number: ${BUILD_NUMBER}\nDeployment Branch: ${SOURCE_BRANCH}\nMerged Branch: ${SOURCE_BRANCH} ← ${MERGED_BRANCH}\nDate/Time: ${CURRENT_DATE}\nStatus: ⚠️ Build aborted ⚠️"
+                    '''
                 }
             }
         }
