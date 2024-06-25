@@ -6,6 +6,12 @@ pipeline {
     }
 
     stages {
+        stage('Clone Code From Repo') {
+            steps {
+                // Get some code from a GitHub repository
+                git branch: 'main', url: 'https://github.com/Amritmatti/Harbor_CICD_Pipeline.git'
+            }
+        }
         stage('Collecting Build User Name') {
             steps {
                 // Collection username of user who has started job
@@ -48,7 +54,7 @@ pipeline {
                         CURRENT_DATE=$(date)
                         curl -s -X POST https://api.telegram.org/bot${TOKEN}/sendMessage \
                             -d "chat_id=${CHAT_ID}" \
-                            -d text="Application: ${APPLICATION_NAME}\nUser: ${BUILD_USER_ID}\nBuild Url: ${BUILD_URL}\nBuild Number: ${BUILD_NUMBER}\nDeployment Branch: ${SOURCE_BRANCH}\nMerged Branch: ${SOURCE_BRANCH} <-- ${MERGED_BRANCH}\nDate/Time: ${CURRENT_DATE}\nStatus: 🚀 Deployment Started 🚀"
+                            -d text="Application: ${APPLICATION_NAME}\nUser: ${BUILD_USER_ID}\nBuild Url: ${BUILD_URL}\nBuild Number: ${BUILD_NUMBER}\nDeployment Branch: ${SOURCE_BRANCH}\nMerged Branch: ${SOURCE_BRANCH} ← ${MERGED_BRANCH}\nDate/Time: ${CURRENT_DATE}\nStatus: 🚀 Deployment Started 🚀"
                         '''
                     }
                 }
@@ -76,7 +82,7 @@ pipeline {
                                     CURRENT_DATE=$(date)
                                     curl -s -X POST https://api.telegram.org/bot${TOKEN}/sendMessage \
                                         -d "chat_id=${CHAT_ID}" \
-                                        -d text="Application: ${APPLICATION_NAME}\nUser: ${BUILD_USER_ID}\nBuild Url: ${BUILD_URL}\nBuild Number: ${BUILD_NUMBER}\nDeployment Branch: ${SOURCE_BRANCH}\nMerged Branch: ${SOURCE_BRANCH} <-- ${MERGED_BRANCH}\nDate/Time: ${CURRENT_DATE}\nStatus: ❌ Failed to build 😱"
+                                        -d text="Application: ${APPLICATION_NAME}\nUser: ${BUILD_USER_ID}\nBuild Url: ${BUILD_URL}\nBuild Number: ${BUILD_NUMBER}\nDeployment Branch: ${SOURCE_BRANCH}\nMerged Branch: ${SOURCE_BRANCH} ← ${MERGED_BRANCH}\nDate/Time: ${CURRENT_DATE}\nStatus: ❌ Failed to build 😱"
                                     '''
                                 }
                             }
@@ -99,7 +105,7 @@ pipeline {
                         CURRENT_DATE=$(date)
                         curl -s -X POST https://api.telegram.org/bot${TOKEN}/sendMessage \
                             -d "chat_id=${CHAT_ID}" \
-                            -d text="Application: ${APPLICATION_NAME}\nUser: ${BUILD_USER_ID}\nBuild Url: ${BUILD_URL}\nBuild Number: ${BUILD_NUMBER}\nDeployment Branch: ${SOURCE_BRANCH}\nMerged Branch: ${SOURCE_BRANCH} <-- ${MERGED_BRANCH}\nDate/Time: ${CURRENT_DATE}\nStatus: ✅ Build successfully 😊"
+                            -d text="Application: ${APPLICATION_NAME}\nUser: ${BUILD_USER_ID}\nBuild Url: ${BUILD_URL}\nBuild Number: ${BUILD_NUMBER}\nDeployment Branch: ${SOURCE_BRANCH}\nMerged Branch: ${SOURCE_BRANCH} ← ${MERGED_BRANCH}\nDate/Time: ${CURRENT_DATE}\nStatus: ✅ Build successfully 😊"
                         '''
                     }
                 }
